@@ -19,3 +19,9 @@ body {
   height: 20%;
   background-color: #228b22;
 }
+
+.game-container {
+  width: 100vw;
+  height: 50vh;
+}
+

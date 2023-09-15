@@ -62,7 +62,7 @@ const Game = () => {
     saveDataToLocalStorage('userData', updatedUserData)
   }
 
-  const removeDisc = (id) => {
+  const removeDisc = (id: number) => {
     // Verwijder de disc op basis van het id
     setDiscs((prevDiscs) => prevDiscs.filter((disc) => disc.id !== id))
   }
@@ -80,7 +80,14 @@ const Game = () => {
       <div
         key={disc.id}
         className="disc"
-        style={{ left: disc.left, top: disc.top }}
+        style={{
+          left: disc.left,
+          top: disc.top,
+          width: '200px',
+          height: '100px',
+          backgroundColor: 'blue',
+          borderRadius: '40%',
+        }}
         onClick={() => handleHit(disc.id)}
       ></div>
     ))
