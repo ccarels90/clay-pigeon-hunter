@@ -14,12 +14,25 @@ const Game = () => {
 
   const [discs, setDiscs] = useState([])
   const [isGameRunning, setIsGameRunning] = useState(false)
+  const [orientationData, setOrientationData] = useState({
+    alpha: null,
+    beta: null,
+    gamma: null,
+  })
 
   useEffect(() => {
     // Haal gebruikersgegevens op uit localStorage bij het mounten van de component
     const savedUserData = getDataFromLocalStorage('userData')
     if (savedUserData) {
       setUserData(savedUserData)
+    }
+
+    // Voeg een eventlistener toe voor deviceorientation
+    window.addEventListener('deviceorientation', handleDeviceOrientation)
+
+    // Cleanup-functie om de eventlistener te verwijderen bij demount
+    return () => {
+      window.removeEventListener('deviceorientation', handleDeviceOrientation)
     }
   }, [])
 
@@ -93,6 +106,15 @@ const Game = () => {
     ))
   }
 
+  const handleDeviceOrientation = (event) => {
+    // Update de oriëntatiewaarden wanneer het event wordt afgevuurd
+    setOrientationData({
+      alpha: event.alpha,
+      beta: event.beta,
+      gamma: event.gamma,
+    })
+  }
+
   return (
     <div className="game-canvas">
       <h1>Welkom, {userData.username}</h1>
@@ -109,6 +131,20 @@ const Game = () => {
       )}
       <button onClick={startGame}>Start het spel</button>
       <button onClick={stopGame}>Stop het spel</button>
+
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '20px',
+          right: '20px',
+          margin: 'auto',
+        }}
+      >
+        <h2>Oriëntatiewaarden:</h2>
+        <p>Alpha: {orientationData.alpha}</p>
+        <p>Beta: {orientationData.beta}</p>
+        <p>Gamma: {orientationData.gamma}</p>
+      </div>
       <div className="game-container">{renderDiscs()}</div>
     </div>
   )
