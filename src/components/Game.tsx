@@ -4,6 +4,7 @@ import {
   getDataFromLocalStorage,
 } from '../utils/localStorage'
 import '../styles/Game.css'
+import HighScores from './HighScores'
 
 const Game = () => {
   const [userData, setUserData] = useState({
@@ -12,33 +13,26 @@ const Game = () => {
     highscores: [],
   })
 
+  let lives = 8
+  let gameSpeed = 0
+  let numberOfhitsInRow = 0
+  let numberOfMisses = 0
+
   const [discs, setDiscs] = useState([])
   const [isGameRunning, setIsGameRunning] = useState(false)
-  const [orientationData, setOrientationData] = useState({
-    alpha: null,
-    beta: null,
-    gamma: null,
-  })
+  const [showHighscores, setShowHighscores] = useState(false)
 
   useEffect(() => {
-    // Haal gebruikersgegevens op uit localStorage bij het mounten van de component
     const savedUserData = getDataFromLocalStorage('userData')
     if (savedUserData) {
       setUserData(savedUserData)
     }
 
-    // Voeg een eventlistener toe voor deviceorientation
-    window.addEventListener('deviceorientation', handleDeviceOrientation)
-
-    // Cleanup-functie om de eventlistener te verwijderen bij demount
-    return () => {
-      window.removeEventListener('deviceorientation', handleDeviceOrientation)
-    }
+    return () => {}
   }, [])
 
   useEffect(() => {
     if (isGameRunning) {
-      // Voeg een nieuwe disc toe aan de lijst van discs op willekeurige posities
       const disc = {
         id: Date.now(),
         left: Math.random() * (window.innerWidth - 50), // Breedte van de disc
@@ -88,7 +82,16 @@ const Game = () => {
     setIsGameRunning(false)
   }
 
-  const renderDiscs = () => {
+  const resetHighScore = () => {
+    const updatedUserData = {
+      ...userData,
+      highscores: [],
+    }
+    setUserData(updatedUserData)
+    saveDataToLocalStorage('userData', updatedUserData)
+  }
+
+  const RenderDiscs = () => {
     return discs.map((disc) => (
       <div
         key={disc.id}
@@ -96,56 +99,92 @@ const Game = () => {
         style={{
           left: disc.left,
           top: disc.top,
-          width: '200px',
-          height: '100px',
-          backgroundColor: 'blue',
-          borderRadius: '40%',
         }}
         onClick={() => handleHit(disc.id)}
       ></div>
     ))
   }
 
-  const handleDeviceOrientation = (event) => {
-    // Update de oriëntatiewaarden wanneer het event wordt afgevuurd
-    setOrientationData({
-      alpha: event.alpha,
-      beta: event.beta,
-      gamma: event.gamma,
-    })
+  const CurrentScore = () => {
+    if (!isGameRunning) return null
+    return (
+      <div className="current-score">
+        Current Score:
+        <br /> <span>{userData.score} points</span>
+      </div>
+    )
+  }
+
+  const CreateUser = () => {
+    const [inputValue, setInputValue] = useState('')
+    const [started, setStarted] = useState(false)
+    const handleInputChange = (event) => {
+      setInputValue(event.target.value)
+    }
+
+    const handleSubmit = (event) => {
+      event.preventDefault()
+      const newUserData = {
+        ...userData,
+        username: inputValue,
+      }
+      setUserData(newUserData)
+      saveDataToLocalStorage('userData', newUserData)
+    }
+
+    return (
+      <div className="modal">
+        <div className="modal__inner">
+          {started ? (
+            <form onSubmit={handleSubmit} className="new-user">
+              <input
+                type="text"
+                placeholder="Fill in your username.."
+                name="username"
+                value={inputValue}
+                onChange={handleInputChange}
+              />
+              <button type="submit">Create User</button>
+            </form>
+          ) : (
+            <button onClick={() => setStarted(true)}>Start</button>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="game-canvas">
-      <h1>Welkom, {userData.username}</h1>
-      <p>Score: {userData.score}</p>
-      {userData.highscores.length > 0 && (
-        <div>
-          <h2>Top 10 Highscores:</h2>
-          <ul>
-            {userData.highscores.map((score, index) => (
-              <li key={index}>{score}</li>
-            ))}
-          </ul>
+      {!userData.username && <CreateUser />}
+      {userData.username && !isGameRunning && (
+        <div className={`intro ${showHighscores ? 'hidden' : ''}`}>
+          <h1>Hi {userData.username}!</h1>
+          <p>Current score: {userData.score}</p>
+          <div className="button__row">
+            {isGameRunning ? (
+              <button onClick={stopGame}>Stop Game</button>
+            ) : (
+              <button onClick={startGame}>Start Game</button>
+            )}
+            <button onClick={() => setShowHighscores(true)}>
+              Show Highscores
+            </button>
+          </div>
         </div>
       )}
-      <button onClick={startGame}>Start het spel</button>
-      <button onClick={stopGame}>Stop het spel</button>
 
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '20px',
-          right: '20px',
-          margin: 'auto',
-        }}
-      >
-        <h2>Oriëntatiewaarden:</h2>
-        <p>Alpha: {orientationData.alpha}</p>
-        <p>Beta: {orientationData.beta}</p>
-        <p>Gamma: {orientationData.gamma}</p>
-      </div>
-      <div className="game-container">{renderDiscs()}</div>
+      <CurrentScore />
+
+      {showHighscores && (
+        <HighScores
+          highscores={userData.highscores}
+          setShowHighscores={setShowHighscores}
+          reset={<button onClick={resetHighScore}>Reset highscore</button>}
+        />
+      )}
+
+      {isGameRunning && RenderDiscs()}
     </div>
   )
 }
