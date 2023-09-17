@@ -6,12 +6,38 @@ import {
 import '../styles/Game.css'
 import HighScores from './HighScores'
 
+class UserData {
+  username: string
+  score: number
+  highscores: number[]
+
+  constructor(username = '', score = 0, highscores = []) {
+    this.username = username
+    this.score = score
+    this.highscores = highscores
+  }
+
+  addUsername(username: string): void {
+    this.username = username
+  }
+
+  updateScore(newScore: number): void {
+    this.score = newScore
+  }
+
+  addHighscore(score: number): void {
+    this.highscores.push(score)
+    this.highscores.sort((a, b) => b - a)
+    this.highscores = this.highscores.slice(0, 10)
+  }
+
+  resetHighscores(): void {
+    this.highscores = []
+  }
+}
+
 const Game = () => {
-  const [userData, setUserData] = useState({
-    username: '',
-    score: 0,
-    highscores: [],
-  })
+  const [userData, setUserData] = useState<UserData>(new UserData())
 
   let lives = 8
   let gameSpeed = 0
@@ -56,17 +82,10 @@ const Game = () => {
     // Verwijder de getroffen disc en verhoog de score
     removeDisc(id)
     const newScore = userData.score + 1
-
-    // Update de gebruikersgegevens inclusief highscores en sla deze op in localStorage
-    const updatedUserData = {
-      ...userData,
-      score: newScore,
-      highscores: [...userData.highscores, newScore]
-        .sort((a, b) => b - a)
-        .slice(0, 10),
-    }
-    setUserData(updatedUserData)
-    saveDataToLocalStorage('userData', updatedUserData)
+    userData.updateScore(newScore)
+    userData.addHighscore(newScore)
+    setUserData(new UserData(userData.username, newScore, userData.highscores))
+    saveDataToLocalStorage('userData', userData)
   }
 
   const removeDisc = (id: number) => {
@@ -83,12 +102,9 @@ const Game = () => {
   }
 
   const resetHighScore = () => {
-    const updatedUserData = {
-      ...userData,
-      highscores: [],
-    }
-    setUserData(updatedUserData)
-    saveDataToLocalStorage('userData', updatedUserData)
+    userData.resetHighscores()
+    setUserData(new UserData(userData.username, userData.score, []))
+    saveDataToLocalStorage('userData', userData)
   }
 
   const RenderDiscs = () => {
@@ -118,34 +134,33 @@ const Game = () => {
   const CreateUser = () => {
     const [inputValue, setInputValue] = useState('')
     const [started, setStarted] = useState(false)
-    const handleInputChange = (event) => {
-      setInputValue(event.target.value)
-    }
 
-    const handleSubmit = (event) => {
-      event.preventDefault()
-      const newUserData = {
-        ...userData,
-        username: inputValue,
-      }
-      setUserData(newUserData)
-      saveDataToLocalStorage('userData', newUserData)
+    const handleChange = (event) => {
+      setInputValue(event.target.value)
     }
 
     return (
       <div className="modal">
         <div className="modal__inner">
           {started ? (
-            <form onSubmit={handleSubmit} className="new-user">
+            <div className="new-user">
               <input
                 type="text"
                 placeholder="Fill in your username.."
                 name="username"
-                value={inputValue}
-                onChange={handleInputChange}
+                onChange={handleChange}
               />
-              <button type="submit">Create User</button>
-            </form>
+              <button
+                onClick={() => {
+                  userData.addUsername(inputValue)
+                  saveDataToLocalStorage('userData', userData)
+
+                  console.log('userData:', userData)
+                }}
+              >
+                Create User
+              </button>
+            </div>
           ) : (
             <button onClick={() => setStarted(true)}>Start</button>
           )}
