@@ -1,0 +1,68 @@
+.container {
+  perspective: 1000px; /* Pas de waarde aan om het perspectief aan te passen */
+  width: 300px; /* De breedte van de container */
+  height: 300px; /* De hoogte van de container */
+  position: relative;
+}
+
+.disc {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 230px;
+  height: 230px;
+  background: #2d3e4f;
+  border-radius: 50%;
+  transform: perspective(450px) rotateX(70deg);
+}
+
+.label {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  background: #ffd166;
+}
+
+.label::before,
+.label::after {
+  content: '';
+  position: absolute;
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  border-radius: 50%;
+}
+
+.label::before {
+  width: 70px;
+  height: 70px;
+  background: #ffd166;
+  border: solid 5px #ff4d80;
+}
+
+.cursor {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.cursor img {
+  user-drag: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}

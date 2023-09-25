@@ -17,6 +17,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   font-size: 18px;
   color: #fff;
+  user-select: none;
 }
 
 .hidden {
@@ -33,13 +34,10 @@ button {
 button {
   background-color: var(--primary-color);
   color: #fff;
-
   border: 0;
   font-weight: bold;
-  cursor: pointer;
   transition: background-color ease-in 0.3s;
   border-radius: var(--border-radius);
-
   text-transform: uppercase;
 }
 
@@ -70,9 +68,7 @@ button:active {
   width: 100%;
   height: 100vh;
   overflow: hidden;
-  background-image: url('../../public/images/bg.png');
-  background-repeat: no-repeat;
-  background-size: cover;
+  background-color: #000;
 }
 
 .modal {
@@ -99,25 +95,6 @@ button:active {
   row-gap: var(--row-gap);
 }
 
-@keyframes float {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-60vh);
-  }
-}
-
-/* Stijl voor de discs */
-.disc {
-  position: absolute;
-  width: 200px;
-  height: 100px;
-  background-color: blue;
-  border-radius: 40%;
-  animation: float 2s ease-in-out infinite; /* Voeg de animatie toe aan de discs */
-}
-
 .current-score {
   position: fixed;
   top: var(--row-gap);
@@ -133,4 +110,11 @@ button:active {
   font-size: 1.4em;
   font-weight: bold;
   margin-top: var(--row-gap);
+}
+
+.highscore-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1;
 }
