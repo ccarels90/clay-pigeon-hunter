@@ -1,18 +1,15 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
-type HighScoreProps = {
-  highscores: number[]
-  setShowHighscores: React.Dispatch<React.SetStateAction<boolean>>
-  reset?: React.ReactNode
-}
+import { useUserData } from './context/UserDataContext'
 
-const HighScores = (props: HighScoreProps) => {
-  const { highscores, setShowHighscores, reset } = props
+const HighScores = () => {
+  const [visibility, setVisibility] = useState(false)
+  const { userData } = useUserData()
 
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
-        setShowHighscores(false)
+        setVisibility(false)
       }
     }
 
@@ -23,13 +20,17 @@ const HighScores = (props: HighScoreProps) => {
     }
   }, [])
 
-  return (
+  const handleResetHighscores = () => {
+    userData.resetHighscores()
+  }
+
+  return visibility ? (
     <div className="modal">
       <div className="modal__inner">
         <h2>Your Highscores</h2>
-        {highscores?.length > 0 ? (
+        {userData.highscores?.length > 0 ? (
           <ol>
-            {highscores.map((score, index) => (
+            {userData.highscores.map((score, index) => (
               <li key={index}>{score}</li>
             ))}
           </ol>
@@ -38,10 +39,14 @@ const HighScores = (props: HighScoreProps) => {
         )}
       </div>
       <div className="button__row">
-        <button onClick={() => setShowHighscores(false)}>Close</button>
-        {reset && reset}
+        <button onClick={() => setVisibility(false)}>Close</button>
+        <button onClick={handleResetHighscores}>Reset highscore</button>
       </div>
     </div>
+  ) : (
+    <button className="highscore-button" onClick={() => setVisibility(true)}>
+      MENU
+    </button>
   )
 }
 
